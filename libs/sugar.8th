@@ -6,4 +6,13 @@
 : vacate  a:clear drop ;
 : delete-from  swap a:remove 2drop ;
 
+' o:method alias: method
+' o:new alias: new
+' o:mutate alias: mutate
+' o:super alias: super
+
+\ ' o:isa alias: is?
+
+
 with: n
+

@@ -2,3 +2,8 @@ pretty print
 make all samples included in Free run on Free
 namespace aliasing
 ability to extend `constant`
+several descriptions in words.html are nonsense
+there are several unfinished sentence fragments in words.html
+documentation on OOP is incomplete
+object.8th sample is incomplete
+nk:frame and nk:render-loop are not documented in wordlist

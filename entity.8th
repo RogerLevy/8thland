@@ -1,54 +1,79 @@
+needs nk/gui
 "libs/sugar.8th" f:include
+"libs/game.8th" f:include
+
+: vec  SED: n n -- a
+	2 a:close ;
+	
+
+0 gvar penx
+0 gvar peny
+
+: at  SED: n n --
+	peny !  penx ! ;
+
+: +at  SED: n n --
+	peny +!  penx +! ;
+
+: penxy
+	penx @ peny @ ;
 
 
 null gvar [me]
-0 gvar penx
-0 gvar peny
 256 q:new true q:overwrite constant oq
 [] constant stock
-[] constant stage
+[] constant stage0
+stage0 gvar [stage]
+
+: stage  [stage] @ ;
+: stage! [stage] ! ;
 
 : me  [me] @ ;
 
-: o!  \ item field --
+: o!  SED: * s --
 	[me] @ -rot m:_! drop ;
 	
-: o@  \ field -- item
+: o@  SED: s -- *
 	[me] @ swap m:@ nip ;
 	
-: o+!  \ n field --
+: o+!  SED: n s --
 	dup o@ rot + swap o! ;
 
-: os+! \ s field --
+: os+! SED: s s --
 	dup o@ rot s:+ swap o! ;
 
-: at  \ x y --
-	peny !  penx ! ;
-
-: [[  \ entity --
+: o{  SED: m --
 	oq [me] @ q:push drop  [me] ! ;
 
-: ]]  \ -- entity
+: }o  SED: -- m
 	[me] @  oq q:shift nip [me] ! ;
 
-: as  \ entity --
+: as  SED: m --
 	[me] ! ;
 
 
 "x" constant x
 "y" constant y
+"vx" constant vx
+"vy" constant vy
 "i" constant i
 "parent" constant parent
+"kind" constant kind
+"drw" constant drw
+"beha" constant beha
 
 : >parent  parent m:@ nip ;
-: >pos  x m:@ swap y m:@ nip ;
+\ : pos>  [ "x", "y" ] m:@ nip ;
+\ : >pos  [ "x", "y" ] m:_! drop ;
+\ : pos!  [ "x", "y" ] o! ;
 : >i  i m:@ nip ;
+: xy  x o@ y o@ ;
 
 : [+stage]  \ entity -- entity
-    dup stage push  [[  stage #items 1- i o!  stage parent o!  ]] ;
+    dup stage push  o{ stage #items 1- i o!  stage parent o! }o ;
 	
 : [init]  \ entity -- entity  
-    [[ penx @ x o! peny @ y o! ]] ;
+    o{ penx @ x o!  peny @ y o!  0 vx o!  0 vy o! }o ;
 		
 : one  \ -- entity
 	stock #items if  stock pop  else  m:new  then  
@@ -60,6 +85,101 @@ null gvar [me]
 : preallocate \ --
 	m:new [init] stock push ;
 
+: draw \ w --
+	drw o! ;
+
+: act \ w --
+	beha o! ;
+
+
+: new-window
+  {
+    name: "main",
+    wide: 640 ,
+    high: 480 ,
+    bg: "palegreen",
+    fonts: {
+      font1: ` 24 font:system ` ,
+      font2: ["tahoma:24", "arial:24", "ubuntu:24"]
+    },
+    font: "font1",
+    title: "Entity Test"
+  }
+  nk:win ;
+
+
+: circf  \ d c --
+	>r >r  penxy  r> dup  4 a:close  r>  nk:fill-circle ;
+
+: main-render
+	{
+		bg: "black",
+		font: "font2",
+		padding: [0,0],
+		flags: [ @nk:WINDOW_NO_SCROLLBAR ]
+	} nk:begin
+		game:event-loop
+    nk:end ;
+
+{
+	render: ( drop 
+		me o{
+			 stage ( as  xy at  drw o@ w:exec ) a:each! drop
+		}o drop
+	),
+	update: ( drop 
+		me o{
+			stage ( as  beha o@ w:exec  vx o@ x o+!  vy o@ y o+! ) a:each! drop
+		}o drop
+	)
+} constant state-stage
+
+: go
+	true  1 60 /   game:state-stage  game:init
+	' main-render 0 nk:render-loop 
+;
+
+\ : app:main
+\ 	new-win  go ;
+
+: *particle
+	one o{
+		rand-pcg 8 mod 4 - vx o!
+		rand-pcg 6 mod 6 - vy o!
+		( 6 "66AA33" circf ) draw
+		(
+			0.1 vy o+!
+		) act
+	}o ;
+
+: *orb
+	one o{
+		( 32 "ee2211" circf ) draw
+		(
+			32 nk:key-down? if
+				xy at  *particle drop
+			then
+			nk:KEY_LEFT nk:key-down? if
+				-3 x o+!
+			then
+			nk:KEY_RIGHT nk:key-down? if
+				3 x o+!
+			then
+			nk:KEY_UP nk:key-down? if
+				-3 y o+!
+			then
+			nk:KEY_DOWN nk:key-down? if
+				3 y o+!
+			then
+		) act
+	}o ;
+
+new-window
+
 ' preallocate 2000 times
 
-one constant it
+*orb constant it
+
+' *particle 100 times reset
+
+\ go
