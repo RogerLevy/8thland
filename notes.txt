@@ -1,0 +1,4 @@
+pretty print
+make all samples included in Free run on Free
+namespace aliasing
+ability to extend `constant`

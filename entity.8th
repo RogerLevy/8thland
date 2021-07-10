@@ -1,0 +1,65 @@
+"libs/sugar.8th" f:include
+
+
+null gvar [me]
+0 gvar penx
+0 gvar peny
+256 q:new true q:overwrite constant oq
+[] constant stock
+[] constant stage
+
+: me  [me] @ ;
+
+: o!  \ item field --
+	[me] @ -rot m:_! drop ;
+	
+: o@  \ field -- item
+	[me] @ swap m:@ nip ;
+	
+: o+!  \ n field --
+	dup o@ rot + swap o! ;
+
+: os+! \ s field --
+	dup o@ rot s:+ swap o! ;
+
+: at  \ x y --
+	peny !  penx ! ;
+
+: [[  \ entity --
+	oq [me] @ q:push drop  [me] ! ;
+
+: ]]  \ -- entity
+	[me] @  oq q:shift nip [me] ! ;
+
+: as  \ entity --
+	[me] ! ;
+
+
+"x" constant x
+"y" constant y
+"i" constant i
+"parent" constant parent
+
+: >parent  parent m:@ nip ;
+: >pos  x m:@ swap y m:@ nip ;
+: >i  i m:@ nip ;
+
+: [+stage]  \ entity -- entity
+    dup stage push  [[  stage #items 1- i o!  stage parent o!  ]] ;
+	
+: [init]  \ entity -- entity  
+    [[ penx @ x o! peny @ y o! ]] ;
+		
+: one  \ -- entity
+	stock #items if  stock pop  else  m:new  then  
+		[init] [+stage] ;
+
+: dismiss \ entity --
+	dup dup >parent delete-from  null parent m:_!  stock push ;
+
+: preallocate \ --
+	m:new [init] stock push ;
+
+' preallocate 2000 times
+
+one constant it

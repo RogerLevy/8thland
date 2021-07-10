@@ -1,0 +1,9 @@
+' var, alias: gvar
+
+: push  swap a:push drop ;
+: pop   a:pop nip ;
+: #items  a:len nip ;
+: vacate  a:clear drop ;
+: delete-from  swap a:remove 2drop ;
+
+with: n
