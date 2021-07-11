@@ -7,3 +7,4 @@ there are several unfinished sentence fragments in words.html
 documentation on OOP is incomplete
 object.8th sample is incomplete
 nk:frame and nk:render-loop are not documented in wordlist
+mod always returns an int

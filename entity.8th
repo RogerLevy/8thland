@@ -1,4 +1,7 @@
 needs nk/gui
+
+true dbg:trace
+
 "libs/sugar.8th" f:include
 "libs/game.8th" f:include
 
@@ -37,7 +40,7 @@ stage0 gvar [stage]
 	[me] @ swap m:@ nip ;
 	
 : o+!  SED: n s --
-	dup o@ rot + swap o! ;
+	dup >r o@ + r> o! ;
 
 : os+! SED: s s --
 	dup o@ rot s:+ swap o! ;
@@ -73,7 +76,7 @@ stage0 gvar [stage]
     dup stage push  o{ stage #items 1- i o!  stage parent o! }o ;
 	
 : [init]  \ entity -- entity  
-    o{ penx @ x o!  peny @ y o!  0 vx o!  0 vy o! }o ;
+    o{ penxy y o! x o!  0 vx o!  0 vy o! }o ;
 		
 : one  \ -- entity
 	stock #items if  stock pop  else  m:new  then  
@@ -127,9 +130,9 @@ stage0 gvar [stage]
 			 stage ( as  xy at  drw o@ w:exec ) a:each! drop
 		}o drop
 	),
-	update: ( drop 
+	update: ( drop cr
 		me o{
-			stage ( as  beha o@ w:exec  vx o@ x o+!  vy o@ y o+! ) a:each! drop
+			stage ( as  i o@ . space  beha o@ w:exec  vx o@ x o+!  vy o@ y o+! ) a:each! drop
 		}o drop
 	)
 } constant state-stage
@@ -139,13 +142,10 @@ stage0 gvar [stage]
 	' main-render 0 nk:render-loop 
 ;
 
-\ : app:main
-\ 	new-win  go ;
-
 : *particle
 	one o{
-		rand-pcg 8 mod 4 - vx o!
-		rand-pcg 6 mod 6 - vy o!
+		rand-pcg 1000000 / 8000 mod 1000 / 4 - vx o!
+		rand-pcg 1000000 / 6000 mod 1000 / 6 - vy o!
 		( 6 "66AA33" circf ) draw
 		(
 			0.1 vy o+!
@@ -156,6 +156,7 @@ stage0 gvar [stage]
 	one o{
 		( 32 "ee2211" circf ) draw
 		(
+			xy at  *particle drop  
 			32 nk:key-down? if
 				xy at  *particle drop
 			then
@@ -174,12 +175,15 @@ stage0 gvar [stage]
 		) act
 	}o ;
 
-new-window
-
-' preallocate 2000 times
 
 *orb constant it
 
-' *particle 100 times reset
-
-\ go
+: app:main
+	new-window
+	
+\	' preallocate 2000 times
+	
+\	' *particle 100 times reset
+	
+	go
+;
