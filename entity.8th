@@ -20,20 +20,12 @@ needs nk/gui
 
 
 null gvar [me]
-null gvar [oq]
-null gvar [stock]
-null gvar [stage0]
-null gvar [stage]
+256 st:new constant ostack
+[] constant stock
+[] constant stage0
+[] constant limbo
+stage0 gvar [stage]
 
-: oq  [oq] @ ;
-: stock  [stock] @ ;
-: stage0  [stage0] @ ;
-: init-collections
-    256 q:new true q:overwrite [oq] !
-    a:new [stock] !
-    a:new [stage0] ! 
-    [stage0] @ [stage] !
-; init-collections
 
 : stage  [stage] @ ;
 : stage! [stage] ! ;
@@ -53,15 +45,16 @@ null gvar [stage]
 	dup o@ rot s:+ swap o! ;
 
 : o{  SED: m --
-	oq [me] @ q:push drop  [me] ! ;
+	ostack me st:push drop  [me] ! ;
 
 : }o  SED: -- m
-	[me] @  oq q:shift nip [me] ! ;
+	me ostack st:pop nip [me] ! ;
 
 : as  SED: m --
 	[me] ! ;
 
 
+"en" constant en
 "x" constant x
 "y" constant y
 "vx" constant vx
@@ -83,14 +76,20 @@ null gvar [stage]
     dup stage push  o{ stage #items 1- i o!  stage parent o! }o ;
 	
 : [init]  SED: m -- m 
-    o{ penxy y o! x o!  0 vx o!  0 vy o! }o ;
+    o{ penxy y o! x o!  0 vx o!  0 vy o!  true en o! }o ;
 		
 : one  SED: -- m
 	stock #items if  stock pop  else  m:new  then  
 		[init] [+stage] ;
 
 : dismiss  SED: m --
-	dup dup >parent delete-from  null parent m:_!  stock push ;
+	en false m:!  limbo push ; 
+
+: sweep  \ --
+    limbo (
+        dup >parent null? nip if drop ;; then
+        dup dup >parent delete-from  null parent m:_!  stock push ) 
+        a:each! a:clear drop ;
 
 : preallocate  SED: n --
 	m:new [init] stock push ;
@@ -101,22 +100,23 @@ null gvar [stage]
 : act  SED: w --
 	beha o! ;
 
-: state-stage  SED: -- m
+: each  SED: w --
+    null;
+    me >r  >r  stage clone-shallow nip
+        ( as  en o@ if  r@ w:exec  then ) a:each! drop
+    r> drop  r> as  ;
+    
 {
 	render: (
         drop
         cr stage #items . 
-		me >r
+		sweep
+        me >r
 			 stage ( as  xy at  drw o@ w:exec ) a:each! drop
 		r> as
 	),
 	update: (
-        drop 
-		me >r
-			stage ( as  beha o@ w:exec  vx o@ x o+!  vy o@ y o+! ) a:each! drop
-		r> as
+        drop  ( beha o@ w:exec  vx o@ x o+!  vy o@ y o+! ) each
 	)
-} ;
-
-
+} constant state-stage
 

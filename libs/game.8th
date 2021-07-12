@@ -44,3 +44,8 @@ var current-time
     then
   again
   state @ "render" m:@ w:exec ;
+  
+: event-loop
+    state @ "update" m:@ w:exec
+    state @ "render" m:@ w:exec
+;
