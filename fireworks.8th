@@ -37,9 +37,9 @@
 	one o{
 		rand-pcg 1000000 / 8000 mod 1000 / 4 - vx o!
 		rand-pcg 1000000 / 7000 mod 1000 / 5 - vy o!
-		( 6 "66AA33" circf ) draw
-		( y o@ 480 > if me dismiss ;; then  0.1 vy o+! ) act
-	}o ;
+        ( 6 "66AA33" circf ) draw
+        ( y o@ 480 > if me dismiss ;; then  0.1 vy o+! ) act
+    }o ;
 
 : go  SED: --
 	true  1 60 /   game:state-stage  game:init

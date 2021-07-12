@@ -4,19 +4,19 @@ needs nk/gui
 "libs/game.8th" f:include
 
 : vec  SED: n n -- a
-	2 a:close ;
-	
+    2 a:close ;
+    
 0 gvar penx
 0 gvar peny
 
 : at  SED: n n --
-	peny !  penx ! ;
+    peny !  penx ! ;
 
 : +at  SED: n n --
-	peny +!  penx +! ;
+    peny +!  penx +! ;
 
 : penxy
-	penx @ peny @ ;
+    penx @ peny @ ;
 
 
 null gvar [me]
@@ -33,25 +33,25 @@ stage0 gvar [stage]
 : me  [me] @ ;
 
 : o!  SED: * s --
-	[me] @ -rot m:_! drop ;
-	
+    [me] @ -rot m:_! drop ;
+    
 : o@  SED: s -- *
-	[me] @ swap m:@ nip ;
-	
+    [me] @ swap m:@ nip ;
+    
 : o+!  SED: n s --
-	dup >r o@ + r> o! ;
+    dup >r o@ + r> o! ;
 
 : os+! SED: s s --
-	dup o@ rot s:+ swap o! ;
+    dup o@ rot s:+ swap o! ;
 
 : o{  SED: m --
-	ostack me st:push drop  [me] ! ;
+    ostack me st:push drop  [me] ! ;
 
 : }o  SED: -- m
-	me ostack st:pop nip [me] ! ;
+    me ostack st:pop nip [me] ! ;
 
 : as  SED: m --
-	[me] ! ;
+    [me] ! ;
 
 
 "en" constant en
@@ -74,16 +74,16 @@ stage0 gvar [stage]
 
 : [+stage]  SED: m -- m
     dup stage push  o{ stage #items 1- i o!  stage parent o! }o ;
-	
+    
 : [init]  SED: m -- m 
     o{ penxy y o! x o!  0 vx o!  0 vy o!  true en o! }o ;
-		
+        
 : one  SED: -- m
-	stock #items if  stock pop  else  m:new  then  
-		[init] [+stage] ;
+    stock #items if  stock pop  else  m:new  then  
+        [init] [+stage] ;
 
 : dismiss  SED: m --
-	en false m:!  limbo push ; 
+    en false m:!  limbo push ; 
 
 : sweep  \ --
     limbo (
@@ -92,13 +92,13 @@ stage0 gvar [stage]
         a:each! a:clear drop ;
 
 : preallocate  SED: n --
-	m:new [init] stock push ;
+    m:new [init] stock push ;
 
 : draw  SED: w --
-	drw o! ;
+    drw o! ;
 
 : act  SED: w --
-	beha o! ;
+    beha o! ;
 
 : each  SED: w --
     null;
@@ -107,16 +107,16 @@ stage0 gvar [stage]
     r> drop  r> as  ;
     
 {
-	render: (
+    render: (
         drop
         cr stage #items . 
-		sweep
+        sweep
         me >r
-			 stage ( as  xy at  drw o@ w:exec ) a:each! drop
-		r> as
-	),
-	update: (
+            stage ( as  xy at  drw o@ w:exec ) a:each! drop
+        r> as
+    ),
+    update: (
         drop  ( beha o@ w:exec  vx o@ x o+!  vy o@ y o+! ) each
-	)
+    )
 } constant state-stage
 
