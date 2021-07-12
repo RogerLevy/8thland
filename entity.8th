@@ -1,14 +1,11 @@
 needs nk/gui
 
-true dbg:trace
-
 "libs/sugar.8th" f:include
 "libs/game.8th" f:include
 
 : vec  SED: n n -- a
 	2 a:close ;
 	
-
 0 gvar penx
 0 gvar peny
 
@@ -23,10 +20,20 @@ true dbg:trace
 
 
 null gvar [me]
-256 q:new true q:overwrite constant oq
-[] constant stock
-[] constant stage0
-stage0 gvar [stage]
+null gvar [oq]
+null gvar [stock]
+null gvar [stage0]
+null gvar [stage]
+
+: oq  [oq] @ ;
+: stock  [stock] @ ;
+: stage0  [stage0] @ ;
+: init-collections
+    256 q:new true q:overwrite [oq] !
+    a:new [stock] !
+    a:new [stage0] ! 
+    [stage0] @ [stage] !
+; init-collections
 
 : stage  [stage] @ ;
 : stage! [stage] ! ;
@@ -72,118 +79,44 @@ stage0 gvar [stage]
 : >i  i m:@ nip ;
 : xy  x o@ y o@ ;
 
-: [+stage]  \ entity -- entity
+: [+stage]  SED: m -- m
     dup stage push  o{ stage #items 1- i o!  stage parent o! }o ;
 	
-: [init]  \ entity -- entity  
+: [init]  SED: m -- m 
     o{ penxy y o! x o!  0 vx o!  0 vy o! }o ;
 		
-: one  \ -- entity
+: one  SED: -- m
 	stock #items if  stock pop  else  m:new  then  
 		[init] [+stage] ;
 
-: dismiss \ entity --
+: dismiss  SED: m --
 	dup dup >parent delete-from  null parent m:_!  stock push ;
 
-: preallocate \ --
+: preallocate  SED: n --
 	m:new [init] stock push ;
 
-: draw \ w --
+: draw  SED: w --
 	drw o! ;
 
-: act \ w --
+: act  SED: w --
 	beha o! ;
 
-
-: new-window
-  {
-    name: "main",
-    wide: 640 ,
-    high: 480 ,
-    bg: "palegreen",
-    fonts: {
-      font1: ` 24 font:system ` ,
-      font2: ["tahoma:24", "arial:24", "ubuntu:24"]
-    },
-    font: "font1",
-    title: "Entity Test"
-  }
-  nk:win ;
-
-
-: circf  \ d c --
-	>r >r  penxy  r> dup  4 a:close  r>  nk:fill-circle ;
-
-: main-render
-	{
-		bg: "black",
-		font: "font2",
-		padding: [0,0],
-		flags: [ @nk:WINDOW_NO_SCROLLBAR ]
-	} nk:begin
-		game:event-loop
-    nk:end ;
-
+: state-stage  SED: -- m
 {
-	render: ( drop 
-		me o{
+	render: (
+        drop
+        cr stage #items . 
+		me >r
 			 stage ( as  xy at  drw o@ w:exec ) a:each! drop
-		}o drop
+		r> as
 	),
-	update: ( drop cr
-		me o{
-			stage ( as  i o@ . space  beha o@ w:exec  vx o@ x o+!  vy o@ y o+! ) a:each! drop
-		}o drop
+	update: (
+        drop 
+		me >r
+			stage ( as  beha o@ w:exec  vx o@ x o+!  vy o@ y o+! ) a:each! drop
+		r> as
 	)
-} constant state-stage
-
-: go
-	true  1 60 /   game:state-stage  game:init
-	' main-render 0 nk:render-loop 
-;
-
-: *particle
-	one o{
-		rand-pcg 1000000 / 8000 mod 1000 / 4 - vx o!
-		rand-pcg 1000000 / 6000 mod 1000 / 6 - vy o!
-		( 6 "66AA33" circf ) draw
-		(
-			0.1 vy o+!
-		) act
-	}o ;
-
-: *orb
-	one o{
-		( 32 "ee2211" circf ) draw
-		(
-			xy at  *particle drop  
-			32 nk:key-down? if
-				xy at  *particle drop
-			then
-			nk:KEY_LEFT nk:key-down? if
-				-3 x o+!
-			then
-			nk:KEY_RIGHT nk:key-down? if
-				3 x o+!
-			then
-			nk:KEY_UP nk:key-down? if
-				-3 y o+!
-			then
-			nk:KEY_DOWN nk:key-down? if
-				3 y o+!
-			then
-		) act
-	}o ;
+} ;
 
 
-*orb constant it
 
-: app:main
-	new-window
-	
-\	' preallocate 2000 times
-	
-\	' *particle 100 times reset
-	
-	go
-;
