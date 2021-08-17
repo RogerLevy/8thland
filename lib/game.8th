@@ -1,0 +1,65 @@
+\
+\ Minimal game timing and state manager library for the 8th programmimg language.
+\
+
+1024 1024 * 1024 1024 * nk:max-vertex-element
+
+0.01 var, dt
+
+var now
+
+: delay  SED: n --   \ n = msec
+    dup 0 <= if drop ;then
+    now @ +
+    repeat  yield dup now @ <=  until!
+    drop ;
+
+{
+	render: ( drop ) ,
+	update: ( drop )
+} constant state-default
+
+state-default var, state
+
+var frame-time
+var accumulator
+var new-time
+var current-time
+
+: secs
+    d:ticks d:ticks/sec n:/ ;
+
+: init  \ vsync dt game-state --
+    state !
+    dt !
+    nk:vsync
+    accumulator off
+    secs current-time ! ;
+
+\ Delta timing routine.
+\ Uses fixed time step for update.
+\ Skips render frames if needed to keep up with the pace.
+: event-loop
+    state @ dup "render" m@ execute 
+    secs new-time !
+    new-time @ current-time @ n:- frame-time !
+    new-time @ current-time !
+    frame-time @ accumulator n:+!
+    repeat
+        accumulator @ dt @ n:> not if
+            break
+        else
+            d:msec now !
+            state @ dup "update" m@ execute
+            accumulator @ dt @ n:- accumulator !
+        then
+    again
+;
+  
+\ : event-loop
+\     state @ dup "update" m@ execute
+\     state @ dup "render" m@ execute
+\ ;
+
+: n:fmod  over swap mod swap frac + ;
+: n:frnd  rand-pcg 1000000 / ;

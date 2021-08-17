@@ -1,8 +1,3 @@
-needs nk/gui
-
-"libs/sugar.8th" f:include
-"libs/game.8th" f:include
-
 : vec  SED: n n -- a
     2 a:close ;
     
@@ -18,7 +13,6 @@ needs nk/gui
 : penxy
     penx @ peny @ ;
 
-
 null gvar [me]
 256 st:new constant ostack
 [] constant stock
@@ -26,29 +20,28 @@ null gvar [me]
 [] constant limbo
 stage0 gvar [stage]
 
-
 : stage  [stage] @ ;
 : stage! [stage] ! ;
 
 : me  [me] @ ;
 
-: o!  SED: * s --
-    [me] @ -rot m:_! drop ;
+: e!  SED: * s --
+    me swap m! ;
     
-: o@  SED: s -- *
-    [me] @ swap m:@ nip ;
+: e@  SED: s -- *
+    me swap m@ ;
     
-: o+!  SED: n s --
-    dup >r o@ + r> o! ;
+: e+!  SED: n s --
+    dup >r e@ + r> e! ;
 
 : os+! SED: s s --
-    dup o@ rot s:+ swap o! ;
+    dup e@ rot s+ swap e! ;
 
 : o{  SED: m --
     ostack me st:push drop  [me] ! ;
 
 : }o  SED: -- m
-    me ostack st:pop nip [me] ! ;
+    me  ostack st:pop nip [me] ! ;
 
 : as  SED: m --
     [me] ! ;
@@ -64,59 +57,64 @@ stage0 gvar [stage]
 "kind" constant kind
 "drw" constant drw
 "beha" constant beha
+"cor" constant cor
 
-: >parent  parent m:@ nip ;
-\ : pos>  [ "x", "y" ] m:@ nip ;
-\ : >pos  [ "x", "y" ] m:_! drop ;
-\ : pos!  [ "x", "y" ] o! ;
-: >i  i m:@ nip ;
-: xy  x o@ y o@ ;
+: >parent  parent m@ ;
+: >i  i m@ ;
+: xy  x e@ y e@ ;
 
 : [+stage]  SED: m -- m
-    dup stage push  o{ stage #items 1- i o!  stage parent o! }o ;
+    dup stage push  o{ stage #items 1- i e!  stage parent e! }o ;
     
 : [init]  SED: m -- m 
-    o{ penxy y o! x o!  0 vx o!  0 vy o!  true en o! }o ;
-        
+    o{ penxy y e! x e!  0 vx e!  0 vy e!  true en e! }o ;
+
+: new-entity  m:new [init] ;
+
 : one  SED: -- m
-    stock #items if  stock pop  else  m:new  then  
-        [init] [+stage] ;
+    stock #items if  stock pop [init]  else  new-entity then  
+        [+stage] ;
 
 : dismiss  SED: m --
     en false m:!  limbo push ; 
 
 : sweep  \ --
     limbo (
-        dup >parent null? nip if drop ;; then
-        dup dup >parent delete-from  null parent m:_!  stock push ) 
-        a:each! a:clear drop ;
+        dup >parent null? nip if drop ;then
+        dup dup >parent delete-from  null over parent m!  stock push
+    ) a:each! a:clear drop ;
 
 : preallocate  SED: n --
     m:new [init] stock push ;
 
 : draw  SED: w --
-    drw o! ;
+    drw e! ;
 
 : act  SED: w --
-    beha o! ;
+    beha e! ;
 
 : each  SED: w --
     null;
     me >r  >r  stage clone-shallow nip
-        ( as  en o@ if  r@ w:exec  then ) a:each! drop
+        ( as  en e@ not if;  r@ execute ) a:each! drop
     r> drop  r> as  ;
     
 {
     render: (
         drop
-        cr stage #items . 
         sweep
         me >r
-            stage ( as  xy at  drw o@ w:exec ) a:each! drop
+            stage ( as  xy at  drw e@ execute ) a:each! drop
         r> as
     ),
     update: (
-        drop  ( beha o@ w:exec  vx o@ x o+!  vy o@ y o+! ) each
+        drop
+        (
+            beha e@ execute
+            cor e@ if  cor e@ yield!  then
+            vx e@ x e+!  vy e@ y e+!
+        ) each
     )
 } constant state-stage
+
 

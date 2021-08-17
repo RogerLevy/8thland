@@ -1,0 +1,111 @@
+
+
+: circf  SED: n s --
+    \ diameter clr --
+	penxy >r >r
+    over -2 / dup +at
+    >r >r  penxy  r> dup  4 a:close  r>  fill-circle
+    r> r> at ;
+
+: box
+\    penxy 6 6 4 a:close "red" "blue" "green" "yellow" fill-rect-color ;
+    penxy 6 6 4 a:close 0 "red" fill-rect ;
+
+: *particle  SED: --
+	one o{
+		frnd 8 fmod 4 - vx e!
+		frnd 7 fmod 5 - vy e!
+        ( box ) draw
+        ( y e@ 480 > if me dismiss ;; then  0.1 vy e+! ) act
+    }o ;
+
+"" constant cmd
+
+: *orb  SED: -- m
+	one o{
+		( 32 "ee2211" circf ) draw
+		(
+			xy at  ( *particle drop ) 10 times
+\            32 key-down? if
+\                stage #items . cr
+\				xy at  ( *particle drop ) 100 times 
+\			then
+            0
+			KEY_LEFT key-down? if
+				-3 x e+!
+                1+
+            then
+			KEY_RIGHT key-down? if
+				3 x e+!
+                1+
+			then
+			KEY_UP key-down? if
+				-3 y e+!
+                1+
+			then
+			KEY_DOWN key-down? if
+				3 y e+!
+                1+
+			then
+\            KEY_ENTER key-pressed? if
+\                cr cmd eval! . 
+\                \ cmd eval! not if  cr  then
+\                cmd s:clear drop
+\                1+
+\            then
+\            0 = if
+\                cmd text? dup . s:append drop
+\            then
+        ) act
+	}o ;
+
+( 123 . . true cr ) is handler
+
+null gvar [it]
+: it  [it] @ ;
+320 240 at *orb [it] !
+
+' preallocate 2000 times
+
+: new-window  SED: --
+    {
+        name: "main",
+        wide: 640 ,
+        high: 480 ,
+        bg: "palegreen",
+        fonts: {
+            font1: ` 24 font:system ` ,
+            font2: ["tahoma:24", "arial:24", "ubuntu:24"]
+        },
+        font: "font1",
+        title: "Fireworks"
+    }
+    nk:win ;
+
+: render-gui  SED: --
+	{
+		bg: "black",
+		font: "font2",
+		padding: [0,0],
+		flags: [ @WINDOW_NO_SCROLLBAR ]
+	} nk:begin
+		event-loop
+    nk:end ;
+
+: go  SED: --
+	true  1 72 /   state-stage  init
+	' render-gui 0 render-loop
+;
+
+: warm
+	go
+;
+
+: cold
+    new-window
+    warm
+;
+
+: app:main
+    cold
+;

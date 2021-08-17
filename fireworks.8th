@@ -1,84 +1,11 @@
+needs nk/gui
+ns: game
+"lib/sugar.8th" f:include
+with: n
+with: G
+with: nk
+with: game
+"lib/game.8th" f:include
 "entity.8th" f:include
+"fireworks-main.8th" f:include
 
-: new-window  SED: --
-    {
-        name: "main",
-        wide: 640 ,
-        high: 480 ,
-        bg: "palegreen",
-        fonts: {
-            font1: ` 24 font:system ` ,
-            font2: ["tahoma:24", "arial:24", "ubuntu:24"]
-        },
-        font: "font1",
-        title: "Fireworks"
-    }
-    nk:win ;
-
-: main-render  SED: --
-	{
-		bg: "black",
-		font: "font2",
-		padding: [0,0],
-		flags: [ @nk:WINDOW_NO_SCROLLBAR ]
-	} nk:begin
-		game:event-loop
-    nk:end ;
-
-: circf  SED: n s --
-    \ diameter clr --
-	penxy >r >r
-    over -2 / dup +at
-    >r >r  penxy  r> dup  4 a:close  r>  nk:fill-circle
-    r> r> at ;
-
-
-: *particle  SED: --
-	one o{
-		rand-pcg 1000000 / 8000 mod 1000 / 4 - vx o!
-		rand-pcg 1000000 / 7000 mod 1000 / 5 - vy o!
-        ( 6 "66AA33" circf ) draw
-        ( y o@ 480 > if me dismiss ;; then  0.1 vy o+! ) act
-    }o ;
-
-: go  SED: --
-	true  1 60 /   game:state-stage  game:init
-	' main-render 0 nk:render-loop
-;
-
-: *orb  SED: --
-	one o{
-		( 32 "ee2211" circf ) draw
-		(
-			xy at  ( *particle drop ) 10 times
-            32 nk:key-down? if
-				xy at  ( *particle drop ) 100 times 
-    			stage #items . cr
-			then
-			nk:KEY_LEFT nk:key-down? if
-				-3 x o+!
-			then
-			nk:KEY_RIGHT nk:key-down? if
-				3 x o+!
-			then
-			nk:KEY_UP nk:key-down? if
-				-3 y o+!
-			then
-			nk:KEY_DOWN nk:key-down? if
-				3 y o+!
-			then
-		) act
-	}o ;
-
-
-null gvar [it]
-: it  [it] @ ;
-
-: app:main
-	new-window
-    320 240 at *orb [it] !
-    
-	' preallocate 2000 times
-	
-	go
-;
