@@ -1,0 +1,3 @@
+8/17
+    coroutines "take over", try implementing the game loop within a coroutine.
+    that theory worked. added successful test logic using coroutines to fireworks

@@ -8,8 +8,10 @@
 
 var now
 
-: delay  SED: n --   \ n = msec
-    dup 0 <= if drop ;then
+: yield  me t:yield as ;
+
+: after  SED: n --   \ n = sec
+    dup 0 = if drop ;then
     now @ +
     repeat  yield dup now @ <=  until!
     drop ;
@@ -41,7 +43,7 @@ var current-time
 \ Skips render frames if needed to keep up with the pace.
 : event-loop
     state @ dup "render" m@ execute 
-    secs new-time !
+    secs dup now ! new-time !
     new-time @ current-time @ n:- frame-time !
     new-time @ current-time !
     frame-time @ accumulator n:+!
@@ -49,7 +51,6 @@ var current-time
         accumulator @ dt @ n:> not if
             break
         else
-            d:msec now !
             state @ dup "update" m@ execute
             accumulator @ dt @ n:- accumulator !
         then
@@ -57,9 +58,30 @@ var current-time
 ;
   
 \ : event-loop
-\     state @ dup "update" m@ execute
 \     state @ dup "render" m@ execute
+\     state @ dup "update" m@ execute
 \ ;
 
 : n:fmod  over swap mod swap frac + ;
 : n:frnd  rand-pcg 1000000 / ;
+
+
+: render-gui  SED: --
+	{
+		bg: "black",
+		font: "font2",
+		padding: [0,0],
+		flags: [ @WINDOW_NO_SCROLLBAR ]
+	} nk:begin
+		event-loop
+    nk:end ;
+
+: [go]
+	true  1 72 /   state-stage  init
+	' render-gui 0 render-loop
+;
+
+: go  SED: --
+    ' [go] t:cor drop
+    t:start
+;

@@ -1,20 +1,20 @@
 "libs/sugar.8th" f:include
 
 
-null gvar [me]
+null gvar (me)
 0 gvar penx
 0 gvar peny
 256 q:new true q:overwrite constant oq
 [] constant stock
 [] constant stage
 
-: me  [me] @ ;
+: me  (me) @ ;
 
 : o!  SED: * s --
-	[me] @ -rot swap o:! drop ;
+	(me) @ -rot swap o:! drop ;
 	
 : o@  SED: s -- *
-	[me] @ swap o:@ nip ;
+	(me) @ swap o:@ nip ;
 	
 : o+!  SED: n s --
 	dup o@ rot + swap o! ;
@@ -29,13 +29,13 @@ null gvar [me]
 	peny +!  penx +! ;
 
 : [[  SED: o --
-	oq [me] @ q:push drop  [me] ! ;
+	oq (me) @ q:push drop  (me) ! ;
 
 : ]]  SED: -- o
-	[me] @  oq q:shift nip [me] ! ;
+	(me) @  oq q:shift nip (me) ! ;
 
 : as  SED: o --
-	[me] ! ;
+	(me) ! ;
 
 
 "x" constant x

@@ -7,6 +7,7 @@
 : delete-from  swap a:remove 2drop ;
 
 ' w:exec alias: execute
+\ : execute  dup if w:exec ;then drop ;
 
 : m@  SED: m s -- *
     m:@ nip ;
@@ -15,9 +16,6 @@
     rot m:! drop ;
 
 ' s:+ alias: s+
-
-' t:yield alias: yield
-' t:yield! alias: yield!
 
 : <=  n:> not ;
 : >=  n:< not ;

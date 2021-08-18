@@ -13,7 +13,7 @@
 : penxy
     penx @ peny @ ;
 
-null gvar [me]
+null gvar (me)
 256 st:new constant ostack
 [] constant stock
 [] constant stage0
@@ -23,7 +23,7 @@ stage0 gvar [stage]
 : stage  [stage] @ ;
 : stage! [stage] ! ;
 
-: me  [me] @ ;
+: me  (me) @ ;
 
 : e!  SED: * s --
     me swap m! ;
@@ -38,13 +38,13 @@ stage0 gvar [stage]
     dup e@ rot s+ swap e! ;
 
 : o{  SED: m --
-    ostack me st:push drop  [me] ! ;
+    ostack me st:push drop  (me) ! ;
 
 : }o  SED: -- m
-    me  ostack st:pop nip [me] ! ;
+    me  ostack st:pop nip (me) ! ;
 
 : as  SED: m --
-    [me] ! ;
+    (me) ! ;
 
 
 "en" constant en
@@ -76,6 +76,7 @@ stage0 gvar [stage]
         [+stage] ;
 
 : dismiss  SED: m --
+    cor m:@ dup if t:cor-drop else drop then
     en false m:!  limbo push ; 
 
 : sweep  \ --
@@ -98,20 +99,20 @@ stage0 gvar [stage]
     me >r  >r  stage clone-shallow nip
         ( as  en e@ not if;  r@ execute ) a:each! drop
     r> drop  r> as  ;
-    
+
 {
-    render: (
+    render: ( \ m --
         drop
         sweep
         me >r
             stage ( as  xy at  drw e@ execute ) a:each! drop
         r> as
     ),
-    update: (
+    update: ( \ m --
         drop
+        t:yield \ let all other coroutines run
         (
             beha e@ execute
-            cor e@ if  cor e@ yield!  then
             vx e@ x e+!  vy e@ y e+!
         ) each
     )

@@ -11,12 +11,33 @@
 \    penxy 6 6 4 a:close "red" "blue" "green" "yellow" fill-rect-color ;
     penxy 6 6 4 a:close 0 "red" fill-rect ;
 
+: ?die
+    y e@ 0 < 
+    y e@ 480 > or
+    x e@ 0 < or
+    x e@ 640 > or
+        if me dismiss ;;; then ;
+
+: ?cor-drop  dup if t:cor-drop else drop then ;
+
+: think
+    cor e@ ?cor-drop
+    ( as w:exec null cor e! )
+        swap me 2 a:close t:cor cor e! ;
+
 : *particle  SED: --
 	one o{
 		frnd 8 fmod 4 - vx e!
 		frnd 7 fmod 5 - vy e!
         ( box ) draw
-        ( y e@ 480 > if me dismiss ;; then  0.1 vy e+! ) act
+        ( ?die  0.1 vy e+! ) act
+        ( 
+            1 after 
+            ( ?die ) act
+            0 vy e! 4 vx e!
+            1 after 4 vy e! 0 vx e!
+
+        ) think
     }o ;
 
 "" constant cmd
@@ -25,11 +46,14 @@
 	one o{
 		( 32 "ee2211" circf ) draw
 		(
-			xy at  ( *particle drop ) 10 times
+        
+			xy at  ( *particle drop ) 4 times
+
 \            32 key-down? if
 \                stage #items . cr
 \				xy at  ( *particle drop ) 100 times 
 \			then
+
             0
 			KEY_LEFT key-down? if
 				-3 x e+!
@@ -81,21 +105,6 @@ null gvar [it]
         title: "Fireworks"
     }
     nk:win ;
-
-: render-gui  SED: --
-	{
-		bg: "black",
-		font: "font2",
-		padding: [0,0],
-		flags: [ @WINDOW_NO_SCROLLBAR ]
-	} nk:begin
-		event-loop
-    nk:end ;
-
-: go  SED: --
-	true  1 72 /   state-stage  init
-	' render-gui 0 render-loop
-;
 
 : warm
 	go
