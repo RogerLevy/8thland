@@ -15,7 +15,6 @@
 
 null gvar (me)
 256 st:new constant ostack
-[] constant stock
 [] constant stage0
 [] constant limbo
 stage0 gvar [stage]
@@ -59,8 +58,6 @@ stage0 gvar [stage]
 "beha" constant beha
 "cor" constant cor
 
-: >parent  parent m@ ;
-: >i  i m@ ;
 : xy  x e@ y e@ ;
 
 : [+stage]  SED: m -- m
@@ -72,8 +69,7 @@ stage0 gvar [stage]
 : new-entity  m:new [init] ;
 
 : one  SED: -- m
-    stock #items if  stock pop [init]  else  new-entity then  
-        [+stage] ;
+    new-entity [+stage] ;
 
 : dismiss  SED: m --
     cor m:@ dup if t:cor-drop else drop then
@@ -81,12 +77,13 @@ stage0 gvar [stage]
 
 : sweep  \ --
     limbo (
-        dup >parent null? nip if drop ;then
-        dup dup >parent delete-from  null over parent m!  stock push
+        dup parent m@ null? nip if drop ;then
+        dup dup parent m@ delete-from  null over parent m!
+        drop
     ) a:each! a:clear drop ;
 
-: preallocate  SED: n --
-    m:new [init] stock push ;
+: preallocate  SED: --
+    ;
 
 : draw  SED: w --
     drw e! ;

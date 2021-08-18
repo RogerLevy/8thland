@@ -83,7 +83,7 @@
         ) act
 	}o ;
 
-( 123 . . true cr ) is handler
+\ ( 123 . . true cr ) is handler
 
 null gvar [it]
 : it  [it] @ ;
