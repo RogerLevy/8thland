@@ -1,0 +1,12 @@
+var fore
+
+: circf  SED: n --
+    \ diameter --
+	penxy >r >r
+    dup >r  -2 / dup +at  
+    penxy  r> dup  4 a:close  fore @  fill-circle
+    r> r> at ;
+
+: rectf  SED: n n --
+    \ w h --
+    >r >r penxy r> r> 4 a:close 0 fore @ fill-rect ;

@@ -1,20 +1,11 @@
-: circf  SED: n s --
-    \ diameter clr --
-	penxy >r >r
-    over -2 / dup +at
-    >r >r  penxy  r> dup  4 a:close  r>  fill-circle
-    r> r> at ;
-
-: box
-\    penxy 6 6 4 a:close "red" "blue" "green" "yellow" fill-rect-color ;
-    penxy 6 6 4 a:close 0 "red" fill-rect ;
-
 : ?die
     y@ 0 < 
     y@ 480 > or
     x@ 0 < or
     x@ 640 > or
         if me @ disable ;;; then ;
+
+: box  0xffff0000 fore ! 6 6 rectf ;
 
 : *particle  SED: -- m
 	one {{
@@ -33,7 +24,7 @@
 
 : *orb  SED: -- m
 	one {{
-		( 32 "ee2211" circf ) render!
+		( $ffee2211 fore ! 32 circf ) render!
 		(
 			x@ y@ at  ( *particle drop ) 4 times
 
