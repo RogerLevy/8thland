@@ -1,6 +1,7 @@
 1024 1024 * 1024 1024 * nk:max-vertex-element
 
-0.01 var, dt
+0.01 var, dt  \ datetime?
+false var, fs  \ fullscreen
 
 var now
 
@@ -25,14 +26,24 @@ var current-time
     drop
 ;
 
-: secs
+: secs  SED: -- n
     d:ticks d:ticks/sec n:/ ;
+
+: toggle-fullscreen  SED: --
+    fs @ not dup fs ! fullscreen ;
+
+: engine-controls  SED: --
+    \ KEY_TAB key-pressed? and if 
+    \     toggle-fullscreen
+    \ then
+;
 
 \ Delta timing routine.
 \ Uses fixed time step for update.
 \ Skips render frames if needed to keep up with the pace.
-: event-loop
+: update-game
     root @ {{ render }}
+    engine-controls
     secs dup now ! new-time !
     new-time @ current-time @ n:- frame-time !
     new-time @ current-time !
@@ -54,16 +65,18 @@ var current-time
     bg: "black",
     font: "font2",
     padding: [0,0],
+    text: "",
     flags: [ @WINDOW_NO_SCROLLBAR ]
 } constant window-settings
 
 : render-gui  SED: --
     window-settings nk:begin
-		event-loop
+		update-game
+        update-repl
     nk:end
 ;
 
-: go-cor
+: game-cor
 	true nk:vsync
     1 72 /  dt !
     accumulator off
@@ -71,7 +84,7 @@ var current-time
 	' render-gui 0 render-loop
 ;
 
-: go  SED: --
-    ' go-cor t:cor drop
+: game  SED: --
+    ' game-cor t:cor drop
     t:start
 ;

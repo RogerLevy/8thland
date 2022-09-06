@@ -6,6 +6,7 @@ with: G
 with: nk
 with: game
 "lib/entity.8th" f:include
+"lib/repl.8th" f:include
 "lib/game.8th" f:include
 "lib/graphics_nk.8th" f:include
 "fireworks-main.8th" f:include

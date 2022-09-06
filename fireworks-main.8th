@@ -21,36 +21,31 @@
              4 vy! 0 vx!
         ) think!
     me @ }} ;
-
-false var, fs
-
-: toggle-fullscreen  SED: --
-    fs @ not dup fs ! fullscreen ;
+    
 : *orb  SED: -- m
 	one {{
 		( $ffee2211 fore ! 32 circf ) render!
 		(
 			x@ y@ at  ( *particle drop ) 4 times
 
-            KEY_ENTER key-pressed? if
-				x@ y@ at  ( *particle drop ) 100 times 
-			then
-
-			KEY_LEFT key-down? if
-				-3 x+!
-            then
-			KEY_RIGHT key-down? if
-				3 x+!
-			then
-			KEY_UP key-down? if
-				-3 y+!
-			then
-			KEY_DOWN key-down? if
-				3 y+!
-			then
-            
-            KEY_TAB key-pressed? if 
-                toggle-fullscreen
+            repl @ not if
+                KEY_ENTER key-pressed? if
+                    x@ y@ at  ( *particle drop ) 100 times 
+                then
+    
+                KEY_LEFT key-down? if
+                    -3 x+!
+                then
+                KEY_RIGHT key-down? if
+                    3 x+!
+                then
+                KEY_UP key-down? if
+                    -3 y+!
+                then
+                KEY_DOWN key-down? if
+                    3 y+!
+                then
+                
             then
 
         ) update!
@@ -76,14 +71,14 @@ null gvar it
 
 : warm  SED: --
     stage-root root !
-	go
+	game
 ;
 
-: cold  SED: --
+: startup  SED: --
     new-window
     warm
 ;
 
 : app:main  SED: --
-    cold
+    startup
 ;

@@ -1,0 +1,58 @@
+with: nk
+
+false var, repl
+
+: repl?  SED: -- f
+    repl @ ;
+
+\ ignore unknown words:
+( . "?" . true ) +hook
+
+"text" constant txt
+
+\ 'txt' manipulators:
+: cmd!  SED: s --
+    txt swap set ;
+: cmd  SED: -- s
+    txt get ;
+: +cmd  SED: s --
+    txt get
+    swap s:append
+    txt swap set ;
+
+: do-it  SED: --
+    cmd eval ;
+
+: update-repl  SED: nk --
+    KEY_TAB key-pressed? if
+        repl @ not repl !
+    then
+
+    repl? not if;
+
+    \ save the nk that's on the stack
+    >r
+
+    \ process useful keys:
+    KEY_BACKSPACE key-pressed? if
+        cmd s:len if  -1 s:lsub  then
+        cmd!
+    then
+
+    KEY_ENTER key-pressed? if
+        "game> " . cmd . cr
+        ' do-it catch if "ERR: " . . then
+        cmd s:clear drop
+    then
+    
+    nk:text? +cmd
+
+    \ display the accumulated text:
+    win-high 2 * 25 - win-wide 1 layout-row-static
+    cmd "_" s:+ const TEXT_LEFT "white" label-colored
+
+    \ restore the stack and the nk
+    reset r>
+;
+
+;with
