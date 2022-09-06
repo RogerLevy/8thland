@@ -22,14 +22,17 @@
         ) think!
     me @ }} ;
 
+false var, fs
+
+: toggle-fullscreen  SED: --
+    fs @ not dup fs ! fullscreen ;
 : *orb  SED: -- m
 	one {{
 		( $ffee2211 fore ! 32 circf ) render!
 		(
 			x@ y@ at  ( *particle drop ) 4 times
 
-            32 key-down? if
-                stage #items . cr
+            KEY_ENTER key-pressed? if
 				x@ y@ at  ( *particle drop ) 100 times 
 			then
 
@@ -44,7 +47,12 @@
 			then
 			KEY_DOWN key-down? if
 				3 y+!
-			then  
+			then
+            
+            KEY_TAB key-pressed? if 
+                toggle-fullscreen
+            then
+
         ) update!
 	me @ }} ;
 
