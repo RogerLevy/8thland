@@ -1,0 +1,90 @@
+: circf  SED: n s --
+    \ diameter clr --
+	penxy >r >r
+    over -2 / dup +at
+    >r >r  penxy  r> dup  4 a:close  r>  fill-circle
+    r> r> at ;
+
+: box
+\    penxy 6 6 4 a:close "red" "blue" "green" "yellow" fill-rect-color ;
+    penxy 6 6 4 a:close 0 "red" fill-rect ;
+
+: ?die
+    y@ 0 < 
+    y@ 480 > or
+    x@ 0 < or
+    x@ 640 > or
+        if me @ disable ;;; then ;
+
+: *particle  SED: -- m
+	one {{
+		frnd 8 fmod 4 - vx!
+		frnd 7 fmod 5 - vy!
+        ( box ) render!
+        ( ?die  0.1 vy+! ) update!
+        ( 
+             1 after
+             ( ?die ) update!
+             0 vy! 4 vx!
+             1 after
+             4 vy! 0 vx!
+        ) think!
+    me @ }} ;
+
+: *orb  SED: -- m
+	one {{
+		( 32 "ee2211" circf ) render!
+		(
+			x@ y@ at  ( *particle drop ) 4 times
+
+            32 key-down? if
+                stage #items . cr
+				x@ y@ at  ( *particle drop ) 100 times 
+			then
+
+			KEY_LEFT key-down? if
+				-3 x+!
+            then
+			KEY_RIGHT key-down? if
+				3 x+!
+			then
+			KEY_UP key-down? if
+				-3 y+!
+			then
+			KEY_DOWN key-down? if
+				3 y+!
+			then  
+        ) update!
+	me @ }} ;
+
+null gvar it
+320 240 at *orb it !
+
+: new-window  SED: --
+    {
+        name: "main",
+        wide: 640 ,
+        high: 480 ,
+        bg: "palegreen",
+        fonts: {
+            font1: ` 24 font:system ` ,
+            font2: ["tahoma:24", "arial:24", "ubuntu:24"]
+        },
+        font: "font1",
+        title: "Fireworks"
+    }
+    nk:win ;
+
+: warm  SED: --
+    stage-root root !
+	go
+;
+
+: cold  SED: --
+    new-window
+    warm
+;
+
+: app:main  SED: --
+    cold
+;

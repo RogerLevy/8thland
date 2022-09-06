@@ -1,0 +1,11 @@
+pretty print
+make all samples included in Free run on Free
+namespace aliasing
+ability to extend `constant`
+several descriptions in words.html are nonsense
+there are several unfinished sentence fragments in words.html
+documentation on object is incomplete
+object.8th sample is incomplete
+nk:frame and nk:render-loop are not documented in wordlist
+mod always returns an int
+Nuklear docs in words.html are incomplete (no begin/end, no description of begin's options)

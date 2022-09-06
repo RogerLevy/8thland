@@ -1,0 +1,131 @@
+0 gvar penx
+0 gvar peny
+
+: at  SED: n n --
+    peny !  penx ! ;
+
+: +at  SED: n n --
+    peny +!  penx +! ;
+
+: penxy  SED: -- n n
+    penx @ peny @ ;
+
+null gvar me
+256 st:new constant ostack
+[] constant stage
+[] constant limbo
+[] constant newbies
+var nextid
+
+: {{  SED: m --
+    ostack me @ st:push drop  me ! ;
+: }}  SED: --
+    ostack st:pop nip me ! ;
+    
+: x@  SED: -- n
+  me @ "x" m@ ;
+: x!  SED: n --
+  me @ "x" m! ;
+: x+!  SED: n --
+  x@ + x! ;
+
+: y@  SED: -- n
+  me @ "y" m@ ;
+: y!  SED: n --
+  me @ "y" m! ;
+: y+!  SED: n --
+  y@ + y! ;
+
+: vx@  SED: -- n
+  me @ "vx" m@ ;
+: vx!  SED: n --
+  me @ "vx" m! ;
+: vx+!  SED: n --
+  vx@ + vx! ;
+
+: vy@  SED: -- n
+  me @ "vy" m@ ;
+: vy!  SED: n --
+  me @ "vy" m! ;
+: vy+!  SED: n --
+  vy@ + vy! ;
+
+: render@  SED: -- w
+  me @ "render" m@ ;
+: render!  SED: w --
+  me @ "render" m! ;
+
+: update@  SED: -- w
+  me @ "update" m@ ;
+: update!  SED: w --
+  me @ "update" m! ;
+
+: cor@  SED: -- t
+  me @ "cor" m@ ;
+: cor!  SED: t --
+  me @ "cor" m! ;
+
+: id@  SED: -- n
+  me @ "id" m@ ;
+: id!  SED: n --
+  me @ "id" m! ;
+
+: render  SED: --
+  render@ execute ;
+: update  SED: --
+  update@ execute ;
+
+{
+    vx: 0 ,
+    vy: 0 ,
+    update: ( ) ,
+    render: ( ) 
+} constant entity-template
+
+: one  SED: -- m
+    m:new
+        dup {{  penxy y! x!  0 vx! 0 vy! }} 
+        dup dup newbies push  {{  nextid @ id!  1 nextid +! }} ;
+
+: disable  SED: m --
+    cor@ dup if  t:cor-drop else drop  then
+    limbo push ; 
+
+: sweep  SED: --
+    limbo (
+\        dup parent m@ null? nip if drop ;then
+\        dup dup parent m@ delete-from  null over parent m!
+        dup stage delete-from
+        drop
+    ) a:each! a:clear drop ;
+
+: everything  SED: w --
+    null;
+    me @ >r  >r  
+        stage ( me !  r@ execute ) a:each! drop
+    r> drop  r> me !  ;
+
+: manifest \ --
+    stage newbies a:+ drop
+    newbies a:clear drop 
+;
+
+{
+    render: ( \ --
+        sweep manifest
+        ( x@ y@ at  render ) everything
+    ),
+    
+    update: ( \ --
+        t:yield \ let all other coroutines run
+        (
+            update
+            vx@ x+!  vy@ y+!
+        ) everything
+    )
+} constant stage-root
+
+: think!  SED: w --
+    cor@ dup if t:cor-drop else drop then 
+    ( me !  w:exec  null cor! )
+        swap me @ 2 a:close t:cor cor! ;

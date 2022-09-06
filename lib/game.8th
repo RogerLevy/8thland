@@ -1,0 +1,77 @@
+1024 1024 * 1024 1024 * nk:max-vertex-element
+
+0.01 var, dt
+
+var now
+
+{
+	render: ( ) ,
+	update: ( )
+} constant default-root
+
+default-root var, root
+
+var frame-time
+var accumulator
+var new-time
+var current-time
+
+: yield
+    me @ t:yield me ! ;
+
+: after  SED: n --   \ n = seconds
+    now @ +
+    repeat  yield  dup now @ <=  until!
+    drop
+;
+
+: secs
+    d:ticks d:ticks/sec n:/ ;
+
+\ Delta timing routine.
+\ Uses fixed time step for update.
+\ Skips render frames if needed to keep up with the pace.
+: event-loop
+    root @ {{ render }}
+    secs dup now ! new-time !
+    new-time @ current-time @ n:- frame-time !
+    new-time @ current-time !
+    frame-time @ accumulator n:+!
+    repeat
+        accumulator @ dt @ n:> not if
+            break
+        else
+            root @ {{ update }}
+            accumulator @ dt @ n:- accumulator ! 
+        then
+    again
+;
+
+: n:fmod  over swap mod swap frac + ;
+: n:frnd  rand-pcg 1000000 / ;
+
+{
+    bg: "black",
+    font: "font2",
+    padding: [0,0],
+    flags: [ @WINDOW_NO_SCROLLBAR ]
+} constant window-settings
+
+: render-gui  SED: --
+    window-settings nk:begin
+		event-loop
+    nk:end
+;
+
+: go-cor
+	true nk:vsync
+    1 72 /  dt !
+    accumulator off
+    secs current-time !
+	' render-gui 0 render-loop
+;
+
+: go  SED: --
+    ' go-cor t:cor drop
+    t:start
+;

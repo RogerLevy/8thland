@@ -1,0 +1,72 @@
+"libs/sugar.8th" f:include
+
+
+null gvar (me)
+0 gvar penx
+0 gvar peny
+256 q:new true q:overwrite constant oq
+[] constant stock
+[] constant stage
+
+: me  (me) @ ;
+
+: o!  SED: * s --
+	(me) @ -rot swap o:! drop ;
+	
+: o@  SED: s -- *
+	(me) @ swap o:@ nip ;
+	
+: o+!  SED: n s --
+	dup o@ rot + swap o! ;
+
+: os+! SED: s s --
+	dup o@ rot s:+ swap o! ;
+
+: at  SED: n n --
+	peny !  penx ! ;
+
+: +at  SED: n n --
+	peny +!  penx +! ;
+
+: [[  SED: o --
+	oq (me) @ q:push drop  (me) ! ;
+
+: ]]  SED: -- o
+	(me) @  oq q:shift nip (me) ! ;
+
+: as  SED: o --
+	(me) ! ;
+
+
+"x" constant x
+"y" constant y
+"i" constant i
+"parent" constant parent
+"kind" constant kind
+"drw" constant drw
+"beha" constant beha
+
+null "Entity" o:new constant Entity
+Entity "test" ( "hi" . ) method
+Entity "ctor" ( [[ penx @ x o! peny @ y o! ]] drop ) method
+
+: >parent  parent o:@ nip ;
+: >pos  x o:@ swap y o:@ nip ;
+: >i  i o:@ nip ;
+
+: [+stage]  \ entity -- entity
+    dup stage push  [[ stage #items 1- i o!  stage parent o! ]] ;
+		
+: one  \ -- entity
+	stock #items if  stock pop  else  Entity null o:new  then  
+		[+stage] ;
+
+: dismiss \ entity --
+	dup dup >parent delete-from  parent null o:!  stock push ;
+
+: preallocate \ --
+	Entity null o:new stock push ;
+
+' preallocate 2000 times
+
+one constant it

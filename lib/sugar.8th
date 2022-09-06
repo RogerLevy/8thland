@@ -1,0 +1,20 @@
+' var, alias: gvar
+
+: push  swap a:push drop ;
+: pop   a:pop nip ;
+: #items  a:len nip ;
+: vacate  a:clear drop ;
+: delete-from  swap a:remove 2drop ;
+
+' w:exec alias: execute
+
+: m@  SED: m s -- *
+    m:@ nip ;
+
+: m!  SED: * m s --
+    rot m:! drop ;
+
+' s:+ alias: s+
+
+: <=  n:> not ;
+: >=  n:< not ;
