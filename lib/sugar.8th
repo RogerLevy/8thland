@@ -18,3 +18,6 @@
 
 : <=  n:> not ;
 : >=  n:< not ;
+
+: 2+  SED: n n n n -- n n
+    rot n:+ >r n:+ r> ;

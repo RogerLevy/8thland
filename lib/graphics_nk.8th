@@ -1,12 +1,40 @@
 var fore
 
+: sized  SED: n n -- a
+    pen 3 rot a:! 2 rot a:! ;
+
 : circf  SED: n --
     \ diameter --
 	penxy >r >r
     dup >r  -2 / dup +at  
-    penxy  r> dup  4 a:close  fore @  fill-circle
+    r> dup sized  fore @  fill-circle
     r> r> at ;
 
 : rectf  SED: n n --
     \ w h --
-    >r >r penxy r> r> 4 a:close 0 fore @ fill-rect ;
+    sized  0  fore @  fill-rect ;
+
+: imgwh  SED: img -- n n
+    img:size rot drop ;
+
+: blit  SED: img --
+    dup imgwh sized  swap  $ffffffff  draw-image ;
+    
+: blitt  SED: img --
+    dup imgwh sized  swap  fore @  draw-image ;
+
+var region
+var img
+
+: rectwh  SED: a -- n n
+    2 a:@ swap 3 a:@ nip ;
+
+: subblit  SED: img rect --
+    region !  img !
+    region @ rectwh  sized  img @  $ffffffff  region @
+      draw-sub-image ;
+
+: subblitt  SED: img rect --
+    region !  img !
+    region @ rectwh  sized  img @  fore @  region @
+      draw-sub-image ;

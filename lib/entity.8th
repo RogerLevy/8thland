@@ -1,14 +1,14 @@
-0 gvar penx
-0 gvar peny
+[ 0 , 0 , 0 , 0 ] constant pen
 
 : at  SED: n n --
-    peny !  penx ! ;
-
-: +at  SED: n n --
-    peny +!  penx +! ;
+    pen 1 rot a:! 0 rot a:! drop ;
 
 : penxy  SED: -- n n
-    penx @ peny @ ;
+    pen 0 a:@ swap 1 a:@ nip ;
+
+: +at  SED: n n --
+    penxy 2+ at ;
+
 
 null gvar me
 256 st:new constant ostack
